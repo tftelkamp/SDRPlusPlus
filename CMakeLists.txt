@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.13)
 project(sdrpp)
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
+
 # Backends
 option(OPT_BACKEND_GLFW "Use the GLFW backend" ON)
 option(OPT_BACKEND_ANDROID "Use the Android backend" OFF)
@@ -11,19 +13,20 @@ option(OPT_OVERRIDE_STD_FILESYSTEM "Use a local version of std::filesystem on sy
 # Sources
 option(OPT_BUILD_AIRSPY_SOURCE "Build Airspy Source Module (Dependencies: libairspy)" ON)
 option(OPT_BUILD_AIRSPYHF_SOURCE "Build Airspy HF+ Source Module (Dependencies: libairspyhf)" ON)
-option(OPT_BUILD_AUDIO_SOURCE "Build Audio Source Module (Dependencies: rtaudio)" ON)
+option(OPT_BUILD_AUDIO_SOURCE "Build Audio Source Module (Dependencies: rtaudio)" OFF)
 option(OPT_BUILD_BADGESDR_SOURCE "Build BadgeSDR Source Module (Dependencies: libusb)" OFF)
 option(OPT_BUILD_BLADERF_SOURCE "Build BladeRF Source Module (Dependencies: libbladeRF)" OFF)
 option(OPT_BUILD_FILE_SOURCE "Wav file source" ON)
 option(OPT_BUILD_FOBOSSDR_SOURCE "Build FobosSDR Source Module (Dependencies: libfobos)" OFF)
-option(OPT_BUILD_HACKRF_SOURCE "Build HackRF Source Module (Dependencies: libhackrf)" ON)
+option(OPT_BUILD_HACKRF_SOURCE "Build HackRF Source Module (Dependencies: libhackrf)" OFF)
 option(OPT_BUILD_HAROGIC_SOURCE "Build Harogic Source Module (Dependencies: htra_api)" OFF)
-option(OPT_BUILD_HERMES_SOURCE "Build Hermes Source Module (no dependencies required)" ON)
+option(OPT_BUILD_HERMES_SOURCE "Build Hermes Source Module (no dependencies required)" OFF)
 option(OPT_BUILD_KCSDR_SOURCE "Build KCSDR Source Module (Dependencies: libkcsdr)" OFF)
 option(OPT_BUILD_LIMESDR_SOURCE "Build LimeSDR Source Module (Dependencies: liblimesuite)" OFF)
 option(OPT_BUILD_NETWORK_SOURCE "Build Network Source Module (no dependencies required)" ON)
+option(OPT_BUILD_VRTZMQ_SOURCE "Build VRT ZMQ Source Module (Dependencies: libzmq libvrt)" ON)
 option(OPT_BUILD_PERSEUS_SOURCE "Build Perseus Source Module (Dependencies: libperseus-sdr)" OFF)
-option(OPT_BUILD_PLUTOSDR_SOURCE "Build PlutoSDR Source Module (Dependencies: libiio, libad9361)" ON)
+option(OPT_BUILD_PLUTOSDR_SOURCE "Build PlutoSDR Source Module (Dependencies: libiio, libad9361)" OFF)
 option(OPT_BUILD_RFNM_SOURCE "Build RFNM Source Module (Dependencies: librfnm)" OFF)
 option(OPT_BUILD_RFSPACE_SOURCE "Build RFspace Source Module (no dependencies required)" ON)
 option(OPT_BUILD_RTL_SDR_SOURCE "Build RTL-SDR Source Module (Dependencies: librtlsdr)" ON)
@@ -32,8 +35,8 @@ option(OPT_BUILD_SDRPP_SERVER_SOURCE "Build SDR++ Server Source Module (no depen
 option(OPT_BUILD_SDRPLAY_SOURCE "Build SDRplay Source Module (Dependencies: libsdrplay)" OFF)
 option(OPT_BUILD_SOAPY_SOURCE "Build SoapySDR Source Module (Dependencies: soapysdr)" OFF)
 option(OPT_BUILD_SPECTRAN_SOURCE "Build Spectran Source Module (Dependencies: Aaronia RTSA Suite)" OFF)
-option(OPT_BUILD_SPECTRAN_HTTP_SOURCE "Build Spectran HTTP Source Module (no dependencies required)" ON)
-option(OPT_BUILD_SPYSERVER_SOURCE "Build SpyServer Source Module (no dependencies required)" ON)
+option(OPT_BUILD_SPECTRAN_HTTP_SOURCE "Build Spectran HTTP Source Module (no dependencies required)" OFF)
+option(OPT_BUILD_SPYSERVER_SOURCE "Build SpyServer Source Module (no dependencies required)" OFF)
 option(OPT_BUILD_USRP_SOURCE "Build USRP Source Module (libuhd)" OFF)
 
 # Sinks
@@ -173,6 +176,10 @@ endif (OPT_BUILD_LIMESDR_SOURCE)
 if (OPT_BUILD_NETWORK_SOURCE)
 add_subdirectory("source_modules/network_source")
 endif (OPT_BUILD_NETWORK_SOURCE)
+
+if (OPT_BUILD_VRTZMQ_SOURCE)
+add_subdirectory("source_modules/vrtzmq_source")
+endif (OPT_BUILD_VRTZMQ_SOURCE)
 
 if (OPT_BUILD_PERSEUS_SOURCE)
 add_subdirectory("source_modules/perseus_source")
