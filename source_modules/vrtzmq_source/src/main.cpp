@@ -172,7 +172,12 @@ private:
     static void tune(double freq, void* ctx) {
         VrtzmqSourceModule* _this = (VrtzmqSourceModule*)ctx;
         if (_this->running) {
-            // Nothing for now
+            // prevent tuning outside of band
+            if (_this->current_freq > 0)
+                if ( (freq < _this->current_freq - _this->current_sample_rate/2) || 
+                     (freq > _this->current_freq + _this->current_sample_rate/2) ) {
+                    tuner::tune(tuner::TUNER_MODE_IQ_ONLY, "", _this->current_freq);
+                }
         }
         _this->freq = freq;
         flog::info("VrtzmqSourceModule '{0}': Tune: {1}!", _this->name, freq);
@@ -232,9 +237,6 @@ private:
 
         bool start_rx = false;
 
-        int64_t current_freq = 0;
-        uint32_t current_sample_rate = 0;
-
         while (true) {
             // Read samples from ZMQ
 
@@ -289,9 +291,9 @@ private:
     bool running = false;
     bool stopwork = false;
     double freq;
-    
-    // int samplerate = 10000000;
-    // int tempSamplerate = 10000000;
+
+    int64_t current_freq = 0;
+    uint32_t current_sample_rate = 0;
    
     char hostname[1024] = "localhost";
     int port = 50100;
