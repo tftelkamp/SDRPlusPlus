@@ -66,6 +66,10 @@ public:
             instance = config.conf[name]["instance"];
             instance = std::clamp<int>(instance, 0, 65535);
         }
+        if (config.conf[name].contains("channel")) {
+            channel = config.conf[name]["channel"];
+            channel = std::clamp<int>(channel, 0, 65535);
+        }
         if (config.conf[name].contains("use_port")) {
             use_port = config.conf[name]["use_port"];
             use_port = std::clamp<int>(use_port, 0, 1);
@@ -204,6 +208,14 @@ private:
             config.conf[_this->name]["instance"] = _this->instance;
             config.release(true);
         }
+        SmGui::LeftLabel("Channel");
+        SmGui::FillWidth();
+        if (SmGui::InputInt(("##vrtzmq_channel_" + _this->name).c_str(), &_this->channel, 0, 0)) {
+            _this->channel = std::clamp<int>(_this->channel, 0, 65535);
+            config.acquire();
+            config.conf[_this->name]["channel"] = _this->channel;
+            config.release(true);
+        }
 
         SmGui::LeftLabel("Port");
         SmGui::FillWidth();
@@ -232,8 +244,8 @@ private:
         packet_type vrt_packet;
 
         init_context(&vrt_context);
-        uint32_t channel = 0;
-        vrt_packet.channel_filt = 1<<channel;
+        uint32_t use_channel = this->channel;
+        vrt_packet.channel_filt = 1<<use_channel;
 
         bool start_rx = false;
 
@@ -299,6 +311,7 @@ private:
     int port = 50100;
     bool use_port = false;
     int instance = 0;
+    int channel = 0;
 
      // VRT ZMQ
     void *context;
