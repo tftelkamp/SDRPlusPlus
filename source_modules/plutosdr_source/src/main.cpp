@@ -24,9 +24,9 @@ SDRPP_MOD_INFO{
 ConfigManager config;
 
 const std::vector<const char*> deviceWhiteList = {
-    "PlutoSDR",
+    "PLUTO",
     "ANTSDR",
-    "LibreSDR"
+    "LIBRESDR"
 };
 
 class PlutoSDRSourceModule : public ModuleManager::Instance {
@@ -135,10 +135,15 @@ private:
             std::string desc = iio_context_info_get_description(info);
             std::string duri = iio_context_info_get_uri(info);
 
+            // Compute an upper case version of the desc for device detection
+            std::string upperDesc;
+            upperDesc.reserve(desc.size());
+            for (char c : desc) { upperDesc += std::toupper(c); }
+
             // If the device is not a plutosdr, don't include it
             bool isPluto = false;
             for (const auto type : deviceWhiteList) {
-                if (desc.find(type) != std::string::npos) {
+                if (upperDesc.find(type) != std::string::npos) {
                     isPluto = true;
                     break;
                 }
@@ -175,6 +180,9 @@ private:
 
             // Construct the device name
             std::string devName = '(' + backend + ") " + model + " [" + serial + ']';
+
+            // Skip duplicate devices
+            if (devices.keyExists(desc) || devices.nameExists(devName) || devices.valueExists(duri)) { continue; }
 
             // Save device
             devices.define(desc, devName, duri);
@@ -311,8 +319,8 @@ private:
         iio_channel_attr_write_longlong(_this->rxLO, "frequency", round(_this->freq));                              // Freq
         iio_channel_attr_write_bool(_this->rxChan, "filter_fir_en", true);                                          // Digital filter
         iio_channel_attr_write_longlong(_this->rxChan, "sampling_frequency", round(_this->samplerate));             // Sample rate
-        iio_channel_attr_write_double(_this->rxChan, "hardwaregain", _this->gain);                                  // Gain
         iio_channel_attr_write(_this->rxChan, "gain_control_mode", _this->gainModes.value(_this->gmId).c_str());    // Gain mode
+        iio_channel_attr_write_double(_this->rxChan, "hardwaregain", _this->gain);                                  // Gain
         _this->setBandwidth(_this->bandwidth);
         
         // Configure the ADC filters

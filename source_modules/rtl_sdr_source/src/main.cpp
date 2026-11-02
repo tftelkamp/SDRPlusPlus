@@ -120,17 +120,29 @@ public:
 
 #ifndef __ANDROID__
         devCount = rtlsdr_get_device_count();
-        char buf[1024];
-        char snBuf[1024];
+        char cbuf[512];
+        char nbuf[512];
+        char venBuf[256];
+        char prodBuf[256];
+        char snBuf[256];
         for (int i = 0; i < devCount; i++) {
             // Gather device info
             const char* devName = rtlsdr_get_device_name(i);
-            int snErr = rtlsdr_get_device_usb_strings(i, NULL, NULL, snBuf);
+            int snErr = rtlsdr_get_device_usb_strings(i, venBuf, prodBuf, snBuf);
 
             // Build name
-            sprintf(buf, "[%s] %s##%d", (!snErr && snBuf[0]) ? snBuf : "No Serial", devName, i);
-            devNames.push_back(buf);
-            devListTxt += buf;
+            if (venBuf[0] && prodBuf[0]) {
+                sprintf(cbuf, "%s %s [%s]", venBuf, prodBuf, (!snErr && snBuf[0]) ? snBuf : "No Serial");
+                sprintf(nbuf, "%s %s [%s]##%d", venBuf, prodBuf, (!snErr && snBuf[0]) ? snBuf : "No Serial", i);
+            }
+            else {
+                sprintf(cbuf, "%s [%s]", devName, (!snErr && snBuf[0]) ? snBuf : "No Serial");
+                sprintf(nbuf, "%s [%s]##%d", devName, (!snErr && snBuf[0]) ? snBuf : "No Serial", i);
+            }
+
+            // Add device to list
+            devNames.push_back(cbuf);
+            devListTxt += nbuf;
             devListTxt += '\0';
         }
 #else
@@ -166,6 +178,7 @@ public:
     }
 
     void selectById(int id) {
+        devId = id;
         selectedDevName = devNames[id];
 
 #ifndef __ANDROID__
@@ -199,8 +212,6 @@ public:
             config.conf["devices"][selectedDevName]["tunerAgc"] = tunerAgc;
             config.conf["devices"][selectedDevName]["gain"] = gainId;
         }
-        if (gainId >= gainList.size()) { gainId = gainList.size() - 1; }
-        updateGainTxt();
 
         // Load config
         if (config.conf["devices"][selectedDevName].contains("sampleRate")) {
@@ -240,8 +251,10 @@ public:
 
         if (config.conf["devices"][selectedDevName].contains("gain")) {
             gainId = config.conf["devices"][selectedDevName]["gain"];
-            updateGainTxt();
         }
+
+        if (gainId >= gainList.size()) { gainId = gainList.size() - 1; }
+        updateGainTxt();
 
         config.release(created);
 
